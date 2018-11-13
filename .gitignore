@@ -1,0 +1,4 @@
+backend/target
+backend/.mvn
+backend/.settings
+backend/gradle
