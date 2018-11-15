@@ -1,59 +1,34 @@
 package sbi.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.rest.core.annotation.HandleAfterCreate;
-import org.springframework.data.rest.core.annotation.HandleAfterDelete;
-import org.springframework.data.rest.core.annotation.HandleAfterSave;
-import org.springframework.data.rest.core.annotation.RepositoryEventHandler;
-import org.springframework.hateoas.EntityLinks;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.stereotype.Component;
 
-import sbi.config.WebSocketConfiguration;
+import com.google.gson.Gson;
+
 import sbi.model.TickerData;
+import sbi.model.TickerDataDTO;
 
 @Component
-@RepositoryEventHandler(TickerData.class)
-public class EventHandler {
+public class EventHandler
+{
+   public static final String MESSAGE_PREFIX = "/topic";
 
    private final SimpMessagingTemplate websocket;
 
-   private final EntityLinks entityLinks;
-
+   private Gson gson = new Gson();
+   
    @Autowired
-   public EventHandler(SimpMessagingTemplate websocket, 
-            EntityLinks entityLinks) {
+   public EventHandler(SimpMessagingTemplate websocket)
+   {
       this.websocket = websocket;
-      this.entityLinks = entityLinks;
    }
 
-   @HandleAfterCreate
-   public void newEmployee(TickerData tickerData) {
-      this.websocket.convertAndSend(
-        WebSocketConfiguration.MESSAGE_PREFIX + "/newEmployee", getPath(tickerData));
-   }
-
-   @HandleAfterDelete
-   public void deleteEmployee(TickerData tickerData) {
-      this.websocket.convertAndSend(
-        WebSocketConfiguration.MESSAGE_PREFIX + "/deleteEmployee", getPath(tickerData));
-   }
-
-   @HandleAfterSave
-   public void updateEmployee(TickerData tickerData) {
-      this.websocket.convertAndSend(
-        WebSocketConfiguration.MESSAGE_PREFIX + "/updateEmployee", getPath(tickerData));
-   }
-
-   /**
-    * Take an {@link TickerData} and get the URI using 
-    * Spring Data REST's {@link EntityLinks}.
-    *
-    * @param tickerData
-    */
-   private String getPath(TickerData tickerData) {
-     return this.entityLinks.linkForSingleResource(tickerData.getClass(),
-         tickerData.getDatetime()).toUri().getPath();
+   @SendToUser("/user/topic/getLatestTickerData")
+   public void sendLatestTickerData(TickerData tickerData) {
+      TickerDataDTO tickerDataDTO = new TickerDataDTO(tickerData);
+      this.websocket.convertAndSend("/topic/getLatestTickerData", gson.toJson(tickerDataDTO));
    }
 
 }

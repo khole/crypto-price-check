@@ -5,21 +5,21 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBRangeKey;
 
 public class TickerDataId
 {
-   private String datetime;
+   private String ticktime;
    private String pair;
+   
+   @DynamoDBRangeKey
+   public String getTicktime()
+   {
+      return ticktime;
+   }
+
+   public void setTicktime(String ticktime)
+   {
+      this.ticktime = ticktime;
+   }
 
    @DynamoDBHashKey
-   public String getDatetime()
-   {
-      return datetime;
-   }
-
-   public void setDatetime(String datetime)
-   {
-      this.datetime = datetime;
-   }
-
-   @DynamoDBRangeKey
    public String getPair()
    {
       return pair;

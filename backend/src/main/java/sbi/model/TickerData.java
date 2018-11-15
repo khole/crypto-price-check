@@ -18,21 +18,21 @@ public class TickerData
    
    private List<Exchange> exchanges = new ArrayList<Exchange>();
 
-   @DynamoDBHashKey(attributeName = "datetime")
-   public String getDatetime()
+   @DynamoDBRangeKey(attributeName = "ticktime")
+   public String getTicktime()
    {
-      return tickerDataId != null ? tickerDataId.getDatetime() : null;
+      return tickerDataId != null ? tickerDataId.getTicktime() : null;
    }
 
-   public void setDatetime(String datetime)
+   public void setTicktime(String ticktime)
    {
       if (tickerDataId == null) {
          tickerDataId = new TickerDataId();
       }
-      tickerDataId.setDatetime(datetime);
+      tickerDataId.setTicktime(ticktime);
    }
 
-   @DynamoDBRangeKey(attributeName = "pair")
+   @DynamoDBHashKey(attributeName = "pair")
    public String getPair()
    {
       return tickerDataId != null ? tickerDataId.getPair() : null;

@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 
-import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.Regions;
@@ -18,18 +17,11 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 @Configuration
 @EnableDynamoDBRepositories(basePackages = "sbi.repositories")
 public class DynamoDBConfig
-{
-
-   // @Value("${amazon.dynamodb.endpoint}")
-   @Value("https://dynamodb.us-west-2.amazonaws.com")
-   private String amazonDynamoDBEndpoint;
-
-   // @Value("${amazon.aws.accesskey}")
-   @Value("AKIAJPQ6IA7JO3AUWO5Q")
+{    
+   @Value("${amazon.aws.accesskey}")
    private String amazonAWSAccessKey;
 
-   // @Value("${amazon.aws.secretkey}")
-   @Value("8KFonJEDoYWnX2iXsfl+uqy3rVsei3A0rSqK7d2R")
+   @Value("${amazon.aws.secretkey}")
    private String amazonAWSSecretKey;
 
    @Autowired
@@ -38,7 +30,7 @@ public class DynamoDBConfig
    @Bean
    public AmazonDynamoDB amazonDynamoDB()
    {
-      BasicAWSCredentials awsCreds = new BasicAWSCredentials("AKIAJPQ6IA7JO3AUWO5Q", "8KFonJEDoYWnX2iXsfl+uqy3rVsei3A0rSqK7d2R");
+      BasicAWSCredentials awsCreds = new BasicAWSCredentials(amazonAWSAccessKey, amazonAWSSecretKey);
       AmazonDynamoDB amazonDynamoDB = AmazonDynamoDBClientBuilder.standard()
             .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
             .withRegion(Regions.US_WEST_2)

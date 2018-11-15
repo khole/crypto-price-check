@@ -1,20 +1,22 @@
 package sbi;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 
-import sbi.model.Exchange;
 import sbi.model.TickerData;
+import sbi.repositories.TickerDataDao;
 import sbi.repositories.TickerDataRepository;
 
 @SpringBootApplication
@@ -22,9 +24,11 @@ import sbi.repositories.TickerDataRepository;
 @EnableScheduling
 public class Application
 {
-
    @Autowired
    TickerDataRepository repository;
+
+   @Autowired
+   TickerDataDao tickerDataDao;
 
    private DynamoDBMapper dynamoDBMapper;
 
@@ -34,30 +38,31 @@ public class Application
    @RequestMapping("/")
    public String home()
    {
-//      try
-//      {
-//         dynamoDBMapper = new DynamoDBMapper(amazonDynamoDB);
-//         CreateTableRequest tableRequest = dynamoDBMapper.generateCreateTableRequest(TickerData.class);
-//         tableRequest.setProvisionedThroughput(new ProvisionedThroughput(1L, 1L));
-//         amazonDynamoDB.createTable(tableRequest);
-//      }
-//      catch (ResourceInUseException e)
-//      {
-//         // Do nothing, table already created
-//      }
-      
-      List<TickerData> result = new ArrayList<TickerData>();
-      repository.findByPair("xrp_jpy").ifPresent(result::add);
-      for (TickerData tickerData : result)
-      {
-         System.out.println(tickerData.getDatetime());
-         System.out.println(tickerData.getPair());
-         for (Exchange exchange : tickerData.getExchanges()) {
-            System.out.println(exchange.getExchange());
-            System.out.println(exchange.getPrice());
-         }
-      }
-      return "Thank you Xuatz!!!!";
+      // try
+      // {
+      // dynamoDBMapper = new DynamoDBMapper(amazonDynamoDB);
+      // CreateTableRequest tableRequest =
+      // dynamoDBMapper.generateCreateTableRequest(TickerData.class);
+      // tableRequest.setProvisionedThroughput(new ProvisionedThroughput(1L, 1L));
+      // amazonDynamoDB.createTable(tableRequest);
+      // }
+      // catch (ResourceInUseException e)
+      // {
+      // // Do nothing, table already created
+      // }
+
+      return "Table Created";
+   }
+
+   @RequestMapping("/current_prices")
+   public List<TickerData> getCurrentPrices()
+   {      
+      TickerData first = repository.findFirstByPairOrderByTicktimeDesc("ETHBTC");
+      String ticktime = first.getTicktime();
+      Iterable<TickerData> iterable =repository.findByTicktime(ticktime);
+      List<TickerData> result = StreamSupport.stream(iterable.spliterator(), false)
+            .collect(Collectors.toList()); 
+      return result;
    }
 
    public static void main(String[] args)

@@ -9,10 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import sbi.controller.EventHandler;
 import sbi.model.BinanceTicker;
 import sbi.model.Exchange;
 import sbi.model.GeminiTicker;
@@ -25,6 +27,8 @@ public class PriceCheckerJobLauncher
 {
    @Autowired
    TickerDataRepository repository;
+   @Autowired
+   EventHandler eventHandler;
 
    final static String iso8601Format = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
    
@@ -41,9 +45,16 @@ public class PriceCheckerJobLauncher
    final static String HITBTC = "hitbtc";
    final static String GEMINI = "gemini";
    final static String BINANCE = "binance";
-  
+   
+   private final SimpMessagingTemplate websocket;
 
 
+   @Autowired
+   public PriceCheckerJobLauncher(SimpMessagingTemplate websocket) {
+      this.websocket = websocket;
+   }
+
+// @Scheduled(fixedDelay = 10000) // 10 seconds
    @Scheduled(fixedDelay = 360000) // 6 minutes
    public void binancePriceChecker()
    {
@@ -53,16 +64,16 @@ public class PriceCheckerJobLauncher
 
       SimpleDateFormat dateFormatter = new SimpleDateFormat(iso8601Format);
       dateFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
-      String datetime = dateFormatter.format(now);
+      String tickerTimestamp = dateFormatter.format(now);
       
       TickerData tickerDataETHBTC = new TickerData();
-      tickerDataETHBTC.setDatetime(datetime);
+      tickerDataETHBTC.setTicktime(tickerTimestamp);
       tickerDataETHBTC.setPair(ETHBTC);
       TickerData tickerDataZECBTC = new TickerData();
-      tickerDataZECBTC.setDatetime(datetime);
+      tickerDataZECBTC.setTicktime(tickerTimestamp);
       tickerDataZECBTC.setPair(ZECBTC);
       TickerData tickerDataLTCBTC = new TickerData();
-      tickerDataLTCBTC.setDatetime(datetime);
+      tickerDataLTCBTC.setTicktime(tickerTimestamp);
       tickerDataLTCBTC.setPair(LTCBTC);
       
       
@@ -146,6 +157,9 @@ public class PriceCheckerJobLauncher
       repository.save(tickerDataETHBTC);
       repository.save(tickerDataZECBTC);
       repository.save(tickerDataLTCBTC);
-      
+      eventHandler.sendLatestTickerData(tickerDataETHBTC);
+      eventHandler.sendLatestTickerData(tickerDataZECBTC);
+      eventHandler.sendLatestTickerData(tickerDataLTCBTC);
    }
+   
 }
