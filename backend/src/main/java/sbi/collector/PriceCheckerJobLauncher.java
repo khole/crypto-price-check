@@ -31,9 +31,16 @@ public class PriceCheckerJobLauncher
    EventHandler eventHandler;
 
    final static String iso8601Format = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
-   
+   // 1,200 requests per minute
+   // https://support.binance.com/hc/en-us/articles/360004492232-API-Frequently-Asked-Questions-FAQ-#%E2%80%9Climits_hardlimits%E2%80%9D
    final static String BINANCE_URL = "https://api.binance.com/api/v1/ticker/price";
+   
+   // 10 requests/second per user.
+   // https://api.hitbtc.com/#rate-limiting
    final static String HITBTC_URL = "https://api.hitbtc.com/api/2/public/ticker";
+   
+   // 120 requests per minute
+   // https://docs.gemini.com/rest-api/#rate-limits
    final static String GEMINI_ETHBTC_URL = "https://api.gemini.com/v1/pubticker/ethbtc";
    final static String GEMINI_ZECBTC_URL = "https://api.gemini.com/v1/pubticker/ethbtc";
    final static String GEMINI_LTCBTC_URL = "https://api.gemini.com/v1/pubticker/ltcbtc";
@@ -45,17 +52,8 @@ public class PriceCheckerJobLauncher
    final static String HITBTC = "hitbtc";
    final static String GEMINI = "gemini";
    final static String BINANCE = "binance";
-   
-   private final SimpMessagingTemplate websocket;
 
-
-   @Autowired
-   public PriceCheckerJobLauncher(SimpMessagingTemplate websocket) {
-      this.websocket = websocket;
-   }
-
-// @Scheduled(fixedDelay = 10000) // 10 seconds
-   @Scheduled(fixedDelay = 360000) // 6 minutes
+   @Scheduled(fixedDelay = 30000) // 30 seconds
    public void binancePriceChecker()
    {
       System.out.println("Fixed delay task - " + System.currentTimeMillis() / 1000);
@@ -157,9 +155,7 @@ public class PriceCheckerJobLauncher
       repository.save(tickerDataETHBTC);
       repository.save(tickerDataZECBTC);
       repository.save(tickerDataLTCBTC);
-      eventHandler.sendLatestTickerData(tickerDataETHBTC);
-      eventHandler.sendLatestTickerData(tickerDataZECBTC);
-      eventHandler.sendLatestTickerData(tickerDataLTCBTC);
+      eventHandler.sendLatestTickerData(tickerDataETHBTC, tickerDataZECBTC, tickerDataLTCBTC);
    }
    
 }

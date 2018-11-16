@@ -12,4 +12,8 @@ public interface TickerDataRepository extends CrudRepository<TickerData, String>
    TickerData findFirstByPairOrderByTicktimeDesc(String pair);
    
    Iterable<TickerData> findByTicktime(String ticktime);
+   
+   Iterable<TickerData> findByPairAndTicktimeGreaterThan(String pair, String ticktime);
+   
+   Iterable<TickerData> findFirst5ByPairOrderByTicktimeDesc(String pair);
 }

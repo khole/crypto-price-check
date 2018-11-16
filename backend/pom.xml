@@ -5,7 +5,7 @@
 
 	<groupId>org.springframework</groupId>
 	<artifactId>sbi-server</artifactId>
-	<version>0.0.7</version>
+	<version>0.0.10</version>
 	<packaging>jar</packaging>
 	<name>Spring Boot Docker</name>
 	<description>Getting started with Spring Boot and Docker</description>
