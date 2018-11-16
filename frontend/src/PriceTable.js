@@ -11,8 +11,8 @@ import axios from 'axios';
 import NumberFormat from 'react-number-format';
 import SockJsClient from 'react-stomp';
 
-const serverUrl = 'http://localhost:8080';
-// const serverUrl = 'http://sbi-lb-1358644542.us-west-2.elb.amazonaws.com';
+// const serverUrl = 'http://localhost:8080';
+const serverUrl = 'http://sbi-lb-1358644542.us-west-2.elb.amazonaws.com';
 const styles = theme => ({
   root: {
     width: '100%',
@@ -97,56 +97,48 @@ class PriceTable extends Component {
   onMessageReceive = (data, topic) => {
     // console.log(data);
     // console.log(topic);
-
-    var newData = [];
-    for (var i = 0; i < this.state.rows.length; i++) {
-      if(this.state.rows[i].pair === data.pair) {
-        var pair = this.createPair(data);
-        newData.push(pair);
-      } else {
-        newData.push(this.state.rows[i]);
-      }
-    }
-    this.setState({ rows: newData });
+    this.updateData(data);
   }
 
   render() {
     return (
-      <Paper>
+      <div style={{marginLeft:'5px', marginRight:'5px'}}>
+      <Paper className={this.state.classes.root}>
         <SockJsClient url={ serverUrl + "/price_checker" } topics={["/topic/getLatestTickerData"]}
                 onMessage={ this.onMessageReceive } ref={ (client) => { this.clientRef = client }}
                 onConnect={ () => { this.setState({ clientConnected: true }) } }
                 onDisconnect={ () => { this.setState({ clientConnected: false }) } }
                 debug={ false }/>
-        <Table>
+        <Table className={this.state.classes.root}>
           <TableHead>
             <TableRow>
-              <TableCell>Pair</TableCell>
-              <TableCell numeric>Binance</TableCell>
-              <TableCell numeric>Gemini</TableCell>
-              <TableCell numeric>Hitbtc</TableCell>
-              <TableCell numeric>Difference</TableCell>
-              <TableCell>Timestamp</TableCell>
+              <TableCell className={this.state.classes.tableCell}>Pair</TableCell>
+              <TableCell className={this.state.classes.tableCell} numeric>Binance</TableCell>
+              <TableCell className={this.state.classes.tableCell} numeric>Gemini</TableCell>
+              <TableCell className={this.state.classes.tableCell} numeric>Hitbtc</TableCell>
+              <TableCell className={this.state.classes.tableCell} numeric>Difference</TableCell>
+              <TableCell className={this.state.classes.tableCell}>Timestamp</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {this.state.rows.map(row => {
               return (
                 <TableRow key={row.id}>
-                  <TableCell component="th" scope="row">
+                  <TableCell className={this.state.classes.tableCell} component="th" scope="row" >
                     {row.pair}
                   </TableCell>
-                  <TableCell numeric>{row.binance}</TableCell>
-                  <TableCell numeric>{row.gemini}</TableCell>
-                  <TableCell numeric>{row.hitbtc}</TableCell>
-                  <TableCell numeric>{row.difference}</TableCell>
-                  <TableCell>{row.timestamp}</TableCell>
+                  <TableCell className={this.state.classes.tableCell} numeric>{row.binance}</TableCell>
+                  <TableCell className={this.state.classes.tableCell} numeric>{row.gemini}</TableCell>
+                  <TableCell className={this.state.classes.tableCell} numeric>{row.hitbtc}</TableCell>
+                  <TableCell className={this.state.classes.tableCell} numeric>{row.difference}</TableCell>
+                  <TableCell className={this.state.classes.tableCell}>{row.timestamp}</TableCell>
                 </TableRow>
               );
             })}
           </TableBody>
         </Table>
       </Paper>
+      </div>
     );
   }
 }
